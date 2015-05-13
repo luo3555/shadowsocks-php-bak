@@ -1,6 +1,14 @@
 # shadowsocks-php
 A php port of shadowsocks
 
+# 体验帐号
+ip :199.168.137.110  
+端口 :443  
+加密方式：table  
+密码：www.workerman.net  
+
+我去，帐号都给了，你也不要吝啬你的星星啦 : )
+
 # 配置
 Applications/Shadowsocks/config.php
 
