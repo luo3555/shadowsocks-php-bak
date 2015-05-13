@@ -1,5 +1,5 @@
 # shadowsocks-php
-A php port of shadowsocks
+A php port of [shadowsocks](https://github.com/shadowsocks/shadowsocks)
 
 # 体验帐号
 ip :199.168.137.110  
