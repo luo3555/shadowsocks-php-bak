@@ -1,5 +1,5 @@
 # shadowsocks-php
-A php port of [shadowsocks](https://github.com/shadowsocks/shadowsocks)
+A php port of [shadowsocks](https://github.com/shadowsocks/shadowsocks) based on [Workerman](https://github.com/walkor/Workerman)
 
 # 体验帐号
 ip :199.168.137.110  
@@ -7,7 +7,7 @@ ip :199.168.137.110
 加密方式：table  
 密码：www.workerman.net  
 
-我去，帐号都给了，你也不要吝啬你的星星啦 : )
+帐号都给了，你也不要吝啬你的星星啦 : )
 
 # 配置
 Applications/Shadowsocks/config.php
