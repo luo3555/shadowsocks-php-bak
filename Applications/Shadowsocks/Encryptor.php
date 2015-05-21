@@ -16,7 +16,6 @@
  * 加密解密类
  * @author walkor<walkor@workerman.net>
  */
-<?php
 class Encryptor
 {
     protected $_key;
@@ -62,8 +61,8 @@ class Encryptor
         }
         if($this->_method)
         {
-            $iv_size = mcrypt_get_iv_size($this->_method, MCRYPT_MODE_CFB);
-            $iv = mcrypt_create_iv($iv_size, MCRYPT_RAND); 
+            $iv_size = openssl_cipher_iv_length($this->_method); 
+            $iv = openssl_random_pseudo_bytes($iv_size); 
             $this->_cipher = $this->getcipher($this->_key, $this->_method, 1, $iv);
         }
         else
@@ -347,3 +346,4 @@ function merge($left, $right, $comparison)
     }
     return $result;
 }
+
