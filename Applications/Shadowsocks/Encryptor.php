@@ -16,6 +16,7 @@
  * 加密解密类
  * @author walkor<walkor@workerman.net>
  */
+<?php
 class Encryptor
 {
     protected $_key;
@@ -51,7 +52,6 @@ class Encryptor
         self::$_encryptTable = $_ref[0];
         self::$_decryptTable = $_ref[1];
     }
-
     public function __construct($key, $method)
     {
         $this->_key = $key;
@@ -76,7 +76,6 @@ class Encryptor
             }
         }
     }
-
     protected static function getTable($key)
     {
         if (isset(self::$_cachedTables[$key])) 
@@ -114,7 +113,6 @@ class Encryptor
        self::$_cachedTables[$key] = $result;
        return $result;
     }
-
     public static function substitute($table, $buf)
     {
         $i = 0;
@@ -143,7 +141,6 @@ class Encryptor
         {
           $this->_cipherIv = substr($iv, 0, $m[1]);
         }
-
         $iv = substr($iv, 0, $m[1]);
         if ($method === 'rc4-md5') 
         {
@@ -162,7 +159,6 @@ class Encryptor
         }
       }
     }
-
     public function encrypt($buffer)
     {
         if($this->_method) 
@@ -183,7 +179,6 @@ class Encryptor
            return self::substitute(self::$_encryptTable, $buffer);
        }
     }
-
     public function decrypt($buffer)
     {
         if($this->_method) 
@@ -195,7 +190,6 @@ class Encryptor
                 $decipher_iv = substr($buffer, 0, $decipher_iv_len);
                 $this->_decipher = $this->getCipher($this->_key, $this->_method, 0, $decipher_iv);
                 $result = $this->_decipher->update(substr($buffer, $decipher_iv_len));
-
                 return $result;
             } 
             else 
@@ -208,7 +202,6 @@ class Encryptor
         {
             return self::substitute(self::$_decryptTable, $buffer);
         }
-
     }
     
     protected function createRc4Md5Cipher($key, $iv, $op)
@@ -223,7 +216,6 @@ class Encryptor
             return Decipher('rc4', $rc4_key, '');
         }
     }
-
     protected function EVPBytesToKey($password, $key_len, $iv_len)
     {
         $cache_key = "$password:$key_len:$iv_len";
@@ -263,43 +255,60 @@ class Encryptor
         return isset(self::$_methodSupported[$method]) ? self::$_methodSupported[$method] : null;
     }
 }
-
-
 class Encipher
 {
     protected $_algorithm;
     protected $_key;
     protected $_iv;
+    protected $_tail;
+    protected $_ivLength;
     public function __construct($algorithm, $key, $iv)
     {
         $this->_algorithm = $algorithm;
         $this->_key = $key;
         $this->_iv = $iv;
+        $this->_ivLength = openssl_cipher_iv_length($algorithm);
     }
-
-    public function update($buffer)
+    public function update($data)
     {
-        echo "algo:".$this->_algorithm."\n";
-        echo "key :".bin2hex($this->_key)."\n";
-        echo "iv  :".bin2hex($this->_iv)."\n";
-        echo "buf :".bin2hex($buffer)."\n";
-        //return mcrypt_encrypt($this->_algorithm, $this->_key, $buffer, 'cfb'/*MCRYPT_MODE_CFB*/, $this->_iv);
-        echo "Encipher iv:".bin2hex($this->_iv)."\n";
-        return openssl_encrypt($buffer, $this->_algorithm, $this->_key, OPENSSL_RAW_DATA, $this->_iv);
+        if (strlen($data) == 0)
+            return '';
+        $tl = strlen($this->_tail);
+        if ($tl)
+            $data = $this->_tail . $data;
+        $b = openssl_encrypt($data, $this->_algorithm, $this->_key, OPENSSL_RAW_DATA, $this->_iv);
+        $result = substr($b, $tl);
+        $dataLength = strlen($data);
+        $mod = $dataLength%$this->_ivLength;
+        if ($dataLength >= $this->_ivLength) {
+          $iPos = -($mod + $this->_ivLength);
+          $this->_iv = substr($b, $iPos, $this->_ivLength);
+        }
+        $this->_tail = $mod!=0 ? substr($data, -$mod):'';
+        return $result;
     }
 }
-
 class Decipher extends Encipher
 {
-    public function update($buffer)
+    public function update($data)
     {
-        //return mcrypt_decrypt($this->_algorithm, $this->_key, $buffer, 'cfb'/*MCRYPT_MODE_CFB*/,  $this->_iv);
-        echo "Decipher iv:".bin2hex($this->_iv)."\n";
-        return openssl_decrypt($buffer, $this->_algorithm, $this->_key, OPENSSL_RAW_DATA, $this->_iv);
+        if (strlen($data) == 0)
+            return '';
+        $tl = strlen($this->_tail);
+        if ($tl)
+            $data = $this->_tail . $data;
+        $b = openssl_decrypt($data, $this->_algorithm, $this->_key, OPENSSL_RAW_DATA, $this->_iv);
+        $result = substr($b, $tl);
+        $dataLength = strlen($data);
+        $mod = $dataLength%$this->_ivLength;
+        if ($dataLength >= $this->_ivLength) {
+          $iPos = -($mod + $this->_ivLength);
+          $this->_iv = substr($data, $iPos, $this->_ivLength); 
+        }
+        $this->_tail = $mod!=0 ? substr($data, -$mod):'';
+        return $result;
     }
 }
-
-
 function merge_sort($array, $comparison)
 {
     if (count($array) < 2) {
@@ -308,7 +317,6 @@ function merge_sort($array, $comparison)
     $middle = ceil(count($array) / 2);
     return merge(merge_sort(slice($array, 0, $middle), $comparison), merge_sort(slice($array, $middle), $comparison), $comparison);
 }
-
 function slice($table, $start, $end = null)
 {
     $table = array_values($table);
@@ -321,7 +329,6 @@ function slice($table, $start, $end = null)
         return array_slice($table, $start);
     }
 }
-
 function merge($left, $right, $comparison)
 {
     $result = array();
