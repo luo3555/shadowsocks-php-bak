@@ -61,7 +61,7 @@ $worker->onConnect = function($connection)use($METHOD, $PASSWORD)
     $connection->encryptor = new Encryptor($PASSWORD, $METHOD);
 };
 
-
+// 当shadowsocks客户端发来消息时
 $worker->onMessage = function($connection, $buffer)
 {
     // 判断当前连接的状态
