@@ -90,12 +90,13 @@ $worker->onMessage = function($connection, $buffer)
             $remote_connection = new AsyncTcpConnection($address);
             $connection->opposite = $remote_connection;
             $remote_connection->opposite = $connection;
-            // 远程连接的发送缓冲区满，则停止读取shadowsocks客户端发来的数据
+            // 流量控制，远程连接的发送缓冲区满，则停止读取shadowsocks客户端发来的数据
+            // 避免由于读取速度大于发送速导致发送缓冲区爆掉
             $remote_connection->onBufferFull = function($remote_connection)
             {
                 $remote_connection->opposite->pauseRecv();
             };
-            // 远程连接的发送缓冲区发送完毕后，则恢复读取shadowsocks客户端发来的数据
+            // 流量控制，远程连接的发送缓冲区发送完毕后，则恢复读取shadowsocks客户端发来的数据
             $remote_connection->onBufferDrain = function($remote_connection)
             {
                 $remote_connection->opposite->resumeRecv();
@@ -108,6 +109,7 @@ $worker->onMessage = function($connection, $buffer)
             // 远程连接断开时，则断开shadowsocks客户端的连接
             $remote_connection->onClose = function($remote_connection)
             {
+                // 关闭对端
                 $remote_connection->opposite->close();
                 $remote_connection->opposite = null;
             };
@@ -118,12 +120,13 @@ $worker->onMessage = function($connection, $buffer)
                 $remote_connection->close();
                 $remote_connection->opposite->close();
             };
-            // shadowsocks客户端的连接发送缓冲区满时，则停止读取远程服务端的数据
+            // 流量控制，shadowsocks客户端的连接发送缓冲区满时，则停止读取远程服务端的数据
+            // 避免由于读取速度大于发送速导致发送缓冲区爆掉
             $connection->onBufferFull = function($connection)
             {
                 $connection->opposite->pauseRecv();
             };
-            // 当shadowsocks客户端的连接发送缓冲区发送完毕后，继续读取远程服务端的数据
+            // 流量控制，当shadowsocks客户端的连接发送缓冲区发送完毕后，继续读取远程服务端的数据
             $connection->onBufferDrain = function($connection)
             {
                 $connection->opposite->resumeRecv();
