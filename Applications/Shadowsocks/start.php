@@ -72,6 +72,10 @@ $worker->onMessage = function($connection, $buffer)
         case STAGE_ADDR:
             // 先解密数据
             $buffer = $connection->encryptor->decrypt($buffer);
+            if(!$buffer)
+            {
+                return $connection->close();
+            }
             // 解析socket5头
             $header_data = parse_socket5_header($buffer);
             // 头部长度
