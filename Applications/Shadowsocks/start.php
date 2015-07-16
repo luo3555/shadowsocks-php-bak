@@ -78,14 +78,14 @@ $worker->onMessage = function($connection, $buffer)
             }
             // 解析socket5头
             $header_data = parse_socket5_header($buffer);
-            // 头部长度
-            $header_len = $header_data[3];
             // 解析头部出错，则关闭连接
             if(!$header_data)
             {
                 $connection->close();
                 return;
             }
+            // 头部长度
+            $header_len = $header_data[3];
             // 解析得到实际请求地址及端口
             $host = $header_data[1];
             $port = $header_data[2];
