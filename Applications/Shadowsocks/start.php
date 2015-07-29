@@ -122,7 +122,10 @@ $worker->onMessage = function($connection, $buffer)
             {
                 echo "remote_connection $address error code:$code msg:$msg\n";
                 $remote_connection->close();
-                $remote_connection->opposite->close();
+                if($remote_connection->opposite)
+                {
+                    $remote_connection->opposite->close();
+                }
             };
             // 流量控制，shadowsocks客户端的连接发送缓冲区满时，则停止读取远程服务端的数据
             // 避免由于读取速度大于发送速导致发送缓冲区爆掉
