@@ -79,7 +79,7 @@ class Encryptor
     {
         if (isset(self::$_cachedTables[$key])) 
         {
-          return self::$_cachedTables[key];
+          return self::$_cachedTables[$key];
         }
         $int32Max = pow(2, 32);
         $table = array();
