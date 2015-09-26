@@ -46,7 +46,7 @@ $worker = new Worker('tcp://0.0.0.0:'.$PORT);
 // 进程数量
 $worker->count = $PROCESS_COUNT;
 // 名称
-$worker->name = 'shadowsocks-php';
+$worker->name = 'shadowsocks-server';
 // 如果加密算法为table，初始化table
 if($METHOD == 'table')
 {
