@@ -63,20 +63,19 @@ $worker->onMessage = function($connection, $buffer)use($LOCAL_PORT, $SERVER, $PO
     switch($connection->stage)
     {
         case STAGE_INIT:
-            //echo bin2hex($buffer)." [ debug 0 ]\n";
-            $connection->send(hex2bin('0500'));
+            $connection->send("\x05\x00");
             $connection->stage = STAGE_ADDR;
             return;
         case STAGE_ADDR:
-            //echo bin2hex($buffer)." [ debug 1 ]\n";
             $cmd = ord($buffer[1]);
             if($cmd != CMD_CONNECT)
             {
                 echo "unsupport cmd\n";
-                $connection->send(hex2bin('05070001'));
+                $connection->send("\x05\x07\x00\x01");
                 return $connection->close();
             }
-            $buf_replies = hex2bin('0500000100000000').pack('n', $LOCAL_PORT);
+            $connection->stage = STAGE_CONNECTING;
+            $buf_replies = "\x05\x00\x00\x01\x00\x00\x00\x00". pack('n', $LOCAL_PORT);
             $connection->send($buf_replies);
             $address = "tcp://$SERVER:$PORT";
             $remote_connection = new AsyncTcpConnection($address);
