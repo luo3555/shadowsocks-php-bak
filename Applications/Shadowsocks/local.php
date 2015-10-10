@@ -1,6 +1,6 @@
 <?php 
 /**
- * This file is part of workerman.
+ * This file is part of shadowsocks-php.
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the MIT-LICENSE.txt
@@ -63,11 +63,14 @@ $worker->onMessage = function($connection, $buffer)use($LOCAL_PORT, $SERVER, $PO
     switch($connection->stage)
     {
         case STAGE_INIT:
+            //与客户端建立SOCKS5连接
+            //参见: https://www.ietf.org/rfc/rfc1928.txt
             $connection->send("\x05\x00");
             $connection->stage = STAGE_ADDR;
             return;
         case STAGE_ADDR:
             $cmd = ord($buffer[1]);
+            //仅处理客户端的TCP连接请求
             if($cmd != CMD_CONNECT)
             {
                 echo "unsupport cmd\n";
@@ -146,6 +149,7 @@ $worker->onMessage = function($connection, $buffer)use($LOCAL_PORT, $SERVER, $PO
             $remote_connection->connect();
             // 改变当前连接的状态为STAGE_STREAM，即开始转发数据流
             $connection->state = STAGE_STREAM;
+            //转发首个数据包，包含由客户端封装的目标地址，端口号等信息
             $buffer = substr($buffer, 3);
             $buffer = $connection->encryptor->encrypt($buffer);
             $remote_connection->send($buffer);
