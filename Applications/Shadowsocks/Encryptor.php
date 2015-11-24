@@ -143,7 +143,7 @@ class Encryptor
         $iv = substr($iv, 0, $m[1]);
         if ($method === 'rc4-md5') 
         {
-          return createRc4Md5Cipher($key, $iv, $op);
+          return $this->createRc4Md5Cipher($key, $iv, $op);
         } 
         else 
         {
